@@ -1,10 +1,10 @@
 import { useSpring, animated } from "@react-spring/three"
-import { useFrame } from "@react-three/fiber"
 import { useRef, useState } from "react"
+import {Mesh} from "three"
 
-export default function Box(props) {
+export default function Box(props: any) {
     // This reference will give us direct access to the mesh
-    const mesh = useRef()
+    const mesh = useRef<Mesh>()
   
     // Set up state for the hovered and active state
     const [hovered, setHover] = useState(false)
@@ -14,14 +14,6 @@ export default function Box(props) {
       scale:active ? [1.5,1.5,1.5] : [1,1,1],
       color: hovered ? 'hotpink' : 'orange'
     })
-    // Rotate mesh every frame, this is outside of React without overhead
-    // useFrame(() => {
-    //   if(mesh.current != null){
-    //     mesh.current.rotation.x = mesh.current.rotation.y += 0.01
-    //   }
-    // })
-
-
   
     return (
       <animated.mesh
@@ -29,10 +21,16 @@ export default function Box(props) {
         ref={mesh}
         scale={scale}
         up={[0, 1, 1]}
-        onClick={(event) => setActive(!active)}
-        onPointerOver={(event) => setHover(true)}
+        onClick={(event) => {
+            setActive(!active);
+        }}
+        userData={{id: "yo"}}
+        onPointerOver={(event) => {
+            setHover(true);
+            console.log("box position", mesh.current?.position)
+        }}
         onPointerOut={(event) => setHover(false)}>
-        <boxBufferGeometry args={[3, 3, 0]} />
+        <boxBufferGeometry args={[0.05, 0.05, 0]} />
         <animated.meshStandardMaterial color={color}/>
       </animated.mesh>
     )

@@ -1,5 +1,5 @@
 import {useThree} from "@react-three/fiber";
-import CameraControls from "camera-controls";
+import CameraControls from "./camera-controls";
 // import keycode from "keycode";
 import {useCallback, useEffect, useState} from "react";
 // import {useSelector} from "react-redux";
