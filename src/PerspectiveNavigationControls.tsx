@@ -6,8 +6,27 @@ import * as THREE from "three";
 import { Box3, Scene, Vector3 } from "three";
 import {useStore} from "./Scene";
 import { useNavigationControls } from "./useNavigationControls";
+import {DOLLY_TO_CURSOR} from "./OrthographicNavigationControls";
 
 CameraControls.install({ THREE: THREE });
+
+/**
+ * Maps clientX and clientY coords from a click handler, onto widths and heights as a ratio of the total canvas width and height.
+ * Top-left = (-1, 1)
+ * Bottom-right = (1, -1)
+ */
+function getRelativeMousePosition(domElement: HTMLCanvasElement, clientX: number, clientY: number) {
+    const rect = domElement.getBoundingClientRect();
+    const mouseX = scale(clientX, rect.left, rect.right, -1, 1);
+    const mouseY = scale(clientY, rect.bottom, rect.top, -1, 1);
+    return {mouseX, mouseY};
+}
+
+// Scales value from range a to range b.
+export function scale(value: number, amin: number, amax: number, bmin: number, bmax: number) {
+    return bmin + (bmax - bmin) * ((value - amin) / (amax - amin));
+}
+
 
 function PerspectiveNavigationControlsContent({controls}: {controls: CameraControls}) {
     const clock = useRef(new THREE.Clock());
@@ -39,15 +58,19 @@ function buildCameraControls(camera: THREE.OrthographicCamera | THREE.Perspectiv
     const controls = new CameraControls(camera, canvas);
     controls.dampingFactor = 0.25;
     controls.draggingDampingFactor = 1;
-    controls.dollyToCursor = true;
-    controls.infinityDolly = true;
+    controls.dollyToCursor = DOLLY_TO_CURSOR;
+
+
+    // try to fix rotation point here
+    // controls.setFocalOffset(0, -0.1, 0);
+    // controls.setOrbitPoint(0, -0.1, 0);
 
     // touch screens
     controls.touches.one = CameraControls.ACTION.TOUCH_ROTATE;
     controls.touches.two = CameraControls.ACTION.TOUCH_ZOOM_TRUCK;
 
     // mouse
-    controls.mouseButtons.pinch = CameraControls.ACTION.ZOOM;
+    controls.mouseButtons.pinch = CameraControls.ACTION.DOLLY;
     controls.mouseButtons.wheel = CameraControls.ACTION.TRUCK;
     controls.mouseButtons.right = CameraControls.ACTION.NONE;
 
@@ -69,20 +92,20 @@ export default function PerspectiveNavigationControls() {
         const bounds = calculateBoundingBox(scene, {});
         const padding = 0.01;
         if (bounds && controls) {
-            await controls.reset(false);
-            if (flipped) {
-                controls?.rotateTo(Math.PI, Math.PI);
-            } else {
-                controls?.rotateTo(0, 0);
-            }
-            await controls.update(1);
+            // await controls.reset(false);
+            // if (flipped) {
+            //     controls?.rotateTo(Math.PI, Math.PI);
+            // } else {
+            //     controls?.rotateTo(0, 0);
+            // }
+            // await controls.update(1);
 
             await controls.fitToBox(bounds, true, {
                 paddingLeft: padding,
                 paddingRight: padding,
                 paddingTop: padding,
                 paddingBottom: padding,
-            });
+            }, flipped ? "back" : "front");
         }
     }, [scene, flipped]);
 
@@ -121,6 +144,39 @@ export default function PerspectiveNavigationControls() {
         window.addEventListener("keydown", cb);
         return () => window.removeEventListener("keydown", cb);
     }, [zoomToFit]);
+
+    useEffect(() => {
+        const setOrbitPoint = (event: MouseEvent) => {
+            // map screen coordinates to scene coordinates
+            const normalizedMouse = new THREE.Vector2();
+            const raycaster = new THREE.Raycaster();
+            const elRect = gl.domElement.getBoundingClientRect();
+            const canvasX = event.clientX - elRect.left;
+            const canvasY = event.clientY - elRect.top;
+
+            normalizedMouse.set(
+                (canvasX / elRect.width) * 2.0 - 1.0,
+                ((elRect.height - canvasY) / elRect.height) * 2.0 - 1.0
+            );
+
+            camera.updateMatrixWorld();
+            raycaster.setFromCamera(normalizedMouse, camera);
+
+            const intersections = raycaster.intersectObjects(scene.children);
+            const filtered = intersections; // here we would filter out only relevant intersections
+
+            if (filtered.length !== 0) {
+                // sphere.position.copy( filtered[ 0 ].point );
+                controlsRef.current?.setOrbitPoint(
+                    filtered[0].point.x,
+                    filtered[0].point.y,
+                    filtered[0].point.z
+                );
+            }
+        };
+        window.addEventListener("mousedown", setOrbitPoint);
+        return () => window.removeEventListener("mousedown", setOrbitPoint);
+    }, [scene, gl.domElement, camera]);
 
     useEffect(() => {
         // Wait until three has activated the camera we want.

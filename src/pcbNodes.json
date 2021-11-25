@@ -1,0 +1,69 @@
+{
+    "0.7784551345747246": {
+        "name": "pad_blah",
+        "type": "pad",
+        "parentUid": "0.9762325082745142",
+        "pcbNodeRuleSet": {
+            "positionX": {
+                "key": "positionX",
+                "value": 0.5,
+                "uid": "0.9109090820849799"
+            },
+            "positionY": {
+                "key": "positionY",
+                "value": 0.5,
+                "uid": "0.8370814055996767"
+            }
+        },
+        "childrenUids": [],
+        "uid": "0.7784551345747246"
+    },
+    "0.3567179787568502": {
+        "name": "pad_blah",
+        "type": "pad",
+        "parentUid": "0.9762325082745142",
+        "pcbNodeRuleSet": {},
+        "childrenUids": ["0.9861945362908651", "0.2635215391939467"],
+        "uid": "0.3567179787568502"
+    },
+    "0.9861945362908651": {
+        "name": "via_blah",
+        "type": "via",
+        "parentUid": "0.3567179787568502",
+        "pcbNodeRuleSet": {},
+        "childrenUids": [],
+        "uid": "0.9861945362908651"
+    },
+    "0.2635215391939467": {
+        "name": "via_blah",
+        "type": "via",
+        "parentUid": "0.3567179787568502",
+        "pcbNodeRuleSet": {},
+        "childrenUids": [],
+        "uid": "0.2635215391939467"
+    },
+    "0.4089820197301548": {
+        "name": "pad_blah",
+        "type": "pad",
+        "parentUid": "0.9762325082745142",
+        "pcbNodeRuleSet": {},
+        "childrenUids": [],
+        "uid": "0.4089820197301548"
+    },
+    "0.20267702273781407": {
+        "name": "via_blah",
+        "type": "via",
+        "parentUid": "0.9762325082745142",
+        "pcbNodeRuleSet": {},
+        "childrenUids": [],
+        "uid": "0.20267702273781407"
+    },
+    "0.17065864097420191": {
+        "name": "via_blah",
+        "type": "via",
+        "parentUid": "0.9762325082745142",
+        "pcbNodeRuleSet": {},
+        "childrenUids": [],
+        "uid": "0.17065864097420191"
+    }
+}

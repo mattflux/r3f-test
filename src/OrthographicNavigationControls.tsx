@@ -21,6 +21,8 @@ function OrthographicNavigationControlsContent({
     return <primitive object={controls} />;
 }
 
+export const DOLLY_TO_CURSOR = true;
+
 // Note @matt: until InteractionControls.buildOrbitControls is removed, it should have a similar config to this
 function buildCameraControls(
     camera: THREE.OrthographicCamera | THREE.PerspectiveCamera,
@@ -29,12 +31,13 @@ function buildCameraControls(
     const controls = new CameraControls(camera, canvas);
     controls.dampingFactor = 0.25;
     controls.draggingDampingFactor = 1;
+    controls.dollyToCursor = DOLLY_TO_CURSOR;
     // touch screens
     controls.touches.one = CameraControls.ACTION.TOUCH_TRUCK;
     controls.touches.two = CameraControls.ACTION.TOUCH_ZOOM_TRUCK;
 
     // mouse
-    controls.mouseButtons.pinch = CameraControls.ACTION.DOLLY;
+    controls.mouseButtons.pinch = CameraControls.ACTION.ZOOM;
     controls.mouseButtons.left = CameraControls.ACTION.TRUCK;
     controls.mouseButtons.right = CameraControls.ACTION.ROTATE;
     controls.mouseButtons.wheel = CameraControls.ACTION.TRUCK;
@@ -71,20 +74,20 @@ export default function OrthographicNavigationControls() {
         const bounds = calculateBoundingBox(scene, {});
         const padding = 0.01;
         if (bounds && controls) {
-            await controls.reset(false);
-            if (flipped) {
-                controls?.rotateTo(Math.PI, Math.PI);
-            } else {
-                controls?.rotateTo(0, 0);
-            }
-            await controls.update(1);
+            // await controls.reset(false);
+            // if (flipped) {
+            //     controls?.rotateTo(Math.PI, Math.PI);
+            // } else {
+            //     controls?.rotateTo(0, 0);
+            // }
+            // await controls.update(1);
 
             await controls.fitToBox(bounds, true, {
                 paddingLeft: padding,
                 paddingRight: padding,
                 paddingTop: padding,
                 paddingBottom: padding,
-            });
+            }, flipped ? "back" : "front");
         }
     }, [scene, flipped]);
 

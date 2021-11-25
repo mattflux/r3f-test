@@ -565,13 +565,13 @@ export class CameraControls extends EventDispatcher {
 
 			};
 
-			const onGestureStart = () => {
+			const onGestureStart = (event: Event) => {
 
 				if ( ! this._enabled || this.mouseButtons.pinch === ACTION.NONE || isTouchScreen ) return;
 
 				this._gesturing = true;
 				this._gestureScaleStart = this._zoom;
-
+                event.preventDefault();
 			};
 
 			const onGestureChanged = ( event: Event ) => {
@@ -583,20 +583,24 @@ export class CameraControls extends EventDispatcher {
                     typeof this._gestureScaleStart !== "number"
 				)
 					return;
+
+
+                this._getClientRect(this._elementRect);
+                const x = this.dollyToCursor ? ( (event as any).clientX - this._elementRect.x ) / this._elementRect.z *   2 - 1 : 0;
+				const y = this.dollyToCursor ? ( (event as any).clientY - this._elementRect.y ) / this._elementRect.w * - 2 + 1 : 0;
+                const FACTOR = 0.5;
+
 				if ( this.mouseButtons.pinch === ACTION.ZOOM ) {
-
-					const newScale = this._gestureScaleStart * ( event as any ).scale;
-					this.zoomTo( newScale, false );
-
+                    const to = (1 - ( event as any ).scale) * FACTOR;
+					this._zoomInternal( to, x, y );
 				}
 
                 if ( this.mouseButtons.pinch === ACTION.DOLLY ) {
-                    // switch this to internal dolly implementation
-					const newScale = this._gestureScaleStart * ( event as any ).scale;
-					this.zoomTo( newScale, false );
-
+					const to = (1 - ( event as any ).scale) * FACTOR;
+					this._dollyInternal( to, x, y);
 				}
-
+                
+                event.preventDefault();
 			};
 
 			let lastScrollTimeStamp = - 1;
@@ -1269,8 +1273,8 @@ export class CameraControls extends EventDispatcher {
 		paddingLeft = 0,
 		paddingRight = 0,
 		paddingBottom = 0,
-		paddingTop = 0
-	}: Partial<FitToOptions> = {} ): Promise<void[]> {
+		paddingTop = 0,
+	}: Partial<FitToOptions> = {}, lock?: "front" | "back" ): Promise<void[]> {
 
 		const promises = [];
 		const aabb = ( box3OrObject as _THREE.Box3 ).isBox3
@@ -1285,8 +1289,15 @@ export class CameraControls extends EventDispatcher {
 		}
 
 		// round to closest axis ( forward | backward | right | left | top | bottom )
-		const theta = roundToStep( this._sphericalEnd.theta, PI_HALF );
-		const phi   = roundToStep( this._sphericalEnd.phi,   PI_HALF );
+        let theta;
+        let phi;
+        if (!lock) {
+            theta = roundToStep( this._sphericalEnd.theta, PI_HALF );
+		    phi   = roundToStep( this._sphericalEnd.phi,   PI_HALF );
+        } else {
+            theta = lock === "front" ? 0 : Math.PI;
+            phi = lock === "front" ? 0 : Math.PI;
+        }
 
 		promises.push( this.rotateTo( theta, phi, enableTransition ) );
 
@@ -2227,6 +2238,38 @@ export class CameraControls extends EventDispatcher {
 
 	};
 
+    protected _dollyToInternal = ( distance: number, x: number, y : number ): void => {
+		const prevRadius = this._sphericalEnd.radius;
+		const signedPrevRadius = prevRadius * ( distance >= prevRadius ? - 1 : 1 );
+
+		this.dollyTo( distance );
+
+		if ( this.infinityDolly && ( distance < this.minDistance || this.maxDistance === this.minDistance ) ) {
+
+			this._camera.getWorldDirection( _v3A );
+			this._targetEnd.add( _v3A.normalize().multiplyScalar( signedPrevRadius ) );
+			this._target.add( _v3A.normalize().multiplyScalar( signedPrevRadius ) );
+
+		}
+
+		if ( this.dollyToCursor ) {
+
+			this._dollyControlAmount += this._sphericalEnd.radius - prevRadius;
+
+			if ( this.infinityDolly && ( distance < this.minDistance || this.maxDistance === this.minDistance ) ) {
+
+				this._dollyControlAmount -= signedPrevRadius;
+
+			}
+
+			this._dollyControlCoord.set( x, y );
+
+		}
+
+		return;
+
+	};
+
 	protected _dollyInternal = ( delta: number, x: number, y : number ): void => {
 
 		const dollyScale = Math.pow( 0.95, - delta * this.dollySpeed );
@@ -2247,6 +2290,8 @@ export class CameraControls extends EventDispatcher {
 		if ( this.dollyToCursor ) {
 
 			this._dollyControlAmount += this._sphericalEnd.radius - prevRadius;
+
+
 
 			if ( this.infinityDolly && ( distance < this.minDistance || this.maxDistance === this.minDistance ) ) {
 
