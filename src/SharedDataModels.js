@@ -1,6 +1,6 @@
 "use strict";
 exports.__esModule = true;
-exports.PcbViaType = exports.BasePcbLayoutNodeTypes = void 0;
+exports.PcbRuleSetType = exports.PcbViaType = exports.BasePcbLayoutNodeTypes = void 0;
 var BasePcbLayoutNodeTypes;
 (function (BasePcbLayoutNodeTypes) {
     BasePcbLayoutNodeTypes["root"] = "root";
@@ -24,3 +24,12 @@ var PcbViaType;
     PcbViaType["buriedOrBlind"] = "buriedOrBlind";
     PcbViaType["microVia"] = "microVia";
 })(PcbViaType = exports.PcbViaType || (exports.PcbViaType = {}));
+var PcbRuleSetType;
+(function (PcbRuleSetType) {
+    PcbRuleSetType["objectSpecific"] = "object";
+    PcbRuleSetType["runtime"] = "runtime";
+    PcbRuleSetType["global"] = "global";
+    PcbRuleSetType["inheritedGlobal"] = "inheritedGlobal";
+    PcbRuleSetType["foreignGlobal"] = "foreignGlobal";
+    PcbRuleSetType["systemDefaultGlobal"] = "systemDefaultGlobal";
+})(PcbRuleSetType = exports.PcbRuleSetType || (exports.PcbRuleSetType = {}));

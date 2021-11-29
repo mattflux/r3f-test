@@ -1,6 +1,5 @@
 import "./App.css";
 import React, { useState, useEffect, Suspense } from "react";
-import Box from "./components/Box";
 import { OrthographicCamera, PerspectiveCamera } from "@react-three/drei";
 import { Stats } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
@@ -11,14 +10,64 @@ import AbstractLayoutView from "./AbstractLayoutView";
 import create from "zustand";
 import PerspectiveNavigationControls from "./PerspectiveNavigationControls";
 import PhysicalLayoutView from "./PhysicalLayoutView";
-import {usePcbVirtualDomStoreSync} from "./PcbVirtualDomStore";
+import { usePcbVirtualDomStoreSync } from "./PcbVirtualDomStore";
+import PcbEditorScene from "./PcbEditorScene";
+import { PcbBoardLayer } from "./bakedModels";
+import {
+    PcbBoardLayerExtended,
+    PcbBoardLayerExtendedMap,
+} from "./SharedDataModels";
 
-export const useStore = create<{
+export interface PcbEditorUiState {
     flipped: boolean;
     setFlipped: (f: boolean) => void;
-}>((set) => ({
+    cameraMode: "2d" | "3d";
+    setCameraMode: (m: "2d" | "3d") => void;
+    layerVisibilityMap: PcbBoardLayerExtendedMap;
+    focussedLayer: PcbBoardLayer | null;
+}
+
+export const usePcbEditorUiStore = create<PcbEditorUiState>((set) => ({
     flipped: false,
     setFlipped: (f: boolean) => set((state) => ({ flipped: f })),
+    cameraMode: "2d",
+    setCameraMode: (m: "2d" | "3d") => set((state) => ({ cameraMode: m })),
+    layerVisibilityMap: {},
+    focussedLayer: null,
+    initLayerVisibilityMap: (layers: PcbBoardLayer[]) => {
+        const updatedLayerVisibilityMap: PcbBoardLayerExtendedMap = {};
+
+        layers.forEach((layer) => {
+            updatedLayerVisibilityMap[layer.uid] = {
+                ...layer,
+                hidden: false,
+                copperFilled: true,
+            };
+        });
+
+        set({ layerVisibilityMap: updatedLayerVisibilityMap });
+    },
+    clearVisibilityMap: () => {
+        set({ layerVisibilityMap: {} });
+    },
+    setFocussedLayer: (focussedLayer: PcbBoardLayer | null) => {
+        set((state) => {
+            const map = state.layerVisibilityMap;
+
+            if (focussedLayer) {
+                let layerUpdated: PcbBoardLayerExtended = {
+                    ...map[focussedLayer.uid],
+                    hidden: false,
+                    copperFilled: true,
+                };
+                map[focussedLayer.uid] = layerUpdated!;
+
+                return { ...state, focussedLayer: focussedLayer, layers: map };
+            }
+
+            return { ...state, focussedLayer: focussedLayer };
+        });
+    },
 }));
 
 /*
@@ -27,26 +76,28 @@ What do we need?
 - import all relevant types - DONE
 - a generator to make an arbitrary Pcb node tree - DONE
 - replicate the "virtualDomStore" - DONE
-- add Zustand dev tools for debugging
+- add Zustand dev tools for debugging - DONE
 - replica layout engine to position nodes according to rules
 
 */
 
 function App() {
     const myCamera = React.useRef();
-    const flipped = useStore((state) => state.flipped);
-    const [is3D, setIs3D] = useState(true);
-
+    const flipped = usePcbEditorUiStore((state) => state.flipped);
+    const { cameraMode, setCameraMode } = usePcbEditorUiStore((state) => ({
+        cameraMode: state.cameraMode,
+        setCameraMode: state.setCameraMode,
+    }));
+    const is3D = cameraMode === "3d";
     useEffect(() => {
         const onKeyDown = (e: any) => {
-            console.log(e);
             if (e.key === "3") {
-                setIs3D(!is3D);
+                setCameraMode(cameraMode === "2d" ? "3d" : "2d");
             }
         };
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [is3D]);
+    }, [cameraMode, setCameraMode]);
 
     usePcbVirtualDomStoreSync();
 
@@ -77,7 +128,7 @@ function App() {
             >
                 <Suspense fallback={null}>
                     {is3D ? (
-                        <ShaderGridPlane position={[0, 0, -0.2]} />
+                        <ShaderGridPlane position={[0, 0, 0]} />
                     ) : (
                         <ShaderGridPlane
                             position={[0, 0, flipped ? 11 : -11]}
@@ -111,22 +162,9 @@ function App() {
                         <OrthographicNavigationControls />
                     </>
                 )}
-                <group>
-                    <axesHelper args={[1]} />
-                    <ambientLight />
-                    <Box position={[0, 0.1, 0]} />
-                    <Box position={[0.1, 0.1, 0]} />
-                    <Box position={[0.2, 0.1, 0]} />
-                    <Box position={[0.3, 0.1, 0]} />
-                    <Box position={[0, -0.1, 0]} />
-                    <group name={"layout"}>
-                        {is3D ? (
-                            <PhysicalLayoutView uid={"layout"} />
-                        ) : (
-                            <AbstractLayoutView uid={"layout"} />
-                        )}
-                    </group>
-                </group>
+                <axesHelper args={[1]} />
+                <ambientLight />
+                <PcbEditorScene cameraMode={is3D ? "3d" : "2d"} />
                 <Stats />
             </Canvas>
         </>

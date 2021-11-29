@@ -20,7 +20,6 @@ export default function Box(props: any) {
         {...props}
         ref={mesh}
         scale={scale}
-        up={[0, 1, 1]}
         onClick={(event) => {
             setActive(!active);
         }}

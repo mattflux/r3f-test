@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Box3, Mesh, MeshPhongMaterial, Vector3 } from "three";
-import { useStore } from "./Scene";
+import { usePcbEditorUiStore } from "./Scene";
 import { Text } from "@react-three/drei";
 
 import useAbstractLayoutMesh from "./useAbstractLayoutMesh";
@@ -22,14 +22,14 @@ function AbstractLayoutView(props: any) {
     // TODO pcbLayoutNodeHoles is dirty everytime...so had to put in isEqual for now until thats fixed
     const { nodeName } = { nodeName: "layout" };
     const {camera} = useThree();
-    const flipCameraState = useStore((state) => state.flipped);
-    const forceFillMeshToBack = flipCameraState ? 10 : -10;
+    const flipCameraState = usePcbEditorUiStore((state) => state.flipped);
+    const forceFillMeshToBack = flipCameraState ? 0.001 : -0.001;
     const contentContainerRef = useRef();
     const frameTextRef = useRef<any>(null!);
 
     const boardShapeWithHoles = useLayoutShape("rectangle");
 
-    const fillMaterial = useMeshPhongMaterial({ color: "orange" });
+    const fillMaterial = useMeshPhongMaterial({ color: "purple", transparent: true, opacity: 0.2 });
     const materials = [fillMaterial, fillMaterial];
 
     const outlineMesh = useAbstractLayoutMesh(boardShapeWithHoles);

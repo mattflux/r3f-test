@@ -12,7 +12,10 @@ import {
     IPcbLayoutRulesMap,
     LayoutRuleName,
 } from "./SharedDataModels";
+import {PcbLayoutEngine} from "./PcbLayoutingEngine";
+import {PcbLayoutNodeTreeTraveler} from "./PcbLayoutNodeTreeTraveler";
 
+const documentId = "my-document";
 export interface IPcbVirtualDomStore {
     pcbLayoutRuleSets: IPcbLayoutRuleSetsMap;
     applyPcbLayoutRuleSetsFromMainStore: (
@@ -44,6 +47,34 @@ export interface IPcbVirtualDomStore {
     removePcbLayoutNodes: (nodeUids: string[]) => void;
     activeLayoutNode?: IPcbLayoutNode;
     setActiveLayoutNode: (node: IPcbLayoutNode) => void;
+}
+
+export function getDefaultLayoutOrFootprint(state: IPcbVirtualDomStore) {
+    const documentUid = documentId;
+    if (documentUid) {
+        const treeTraveler = new PcbLayoutNodeTreeTraveler(state.pcbLayoutNodes);
+        let defaultLayoutOrFootprint: IPcbLayoutNode = treeTraveler.getDefaultLayout(documentUid);
+        if (!defaultLayoutOrFootprint) {
+            defaultLayoutOrFootprint = treeTraveler.getDefaultFootprint(documentUid);
+        }
+        return defaultLayoutOrFootprint;
+    }
+}
+
+
+// TODO: implement this and call it on each change as-per-graviton
+// this will allow the rules to reside on the PCB nodes as we want
+function bakeChanges(state: IPcbVirtualDomStore) {
+    const pcbLayoutEngine = new PcbLayoutEngine(
+        documentId,
+        {},
+        {},
+        {},
+        state.pcbLayoutNodes,
+        {}, // no mocked rulesets yet
+    );
+
+    pcbLayoutEngine.applyPcbLayoutRulesToPcbDOM();
 }
 
 export function usePcbVirtualDomStoreSync() {
@@ -79,6 +110,7 @@ export const usePcbVirtualDomStore = create<IPcbVirtualDomStore>(
             set(
                 produce((state: IPcbVirtualDomStore) => {
                     state.pcbLayoutRuleSets = ruleSets;
+                    bakeChanges(state);
                 })
             ),
         setPcbLayoutRuleSets: (ruleSets: IGlobalPcbLayoutRuleSetData[]) =>
@@ -87,6 +119,7 @@ export const usePcbVirtualDomStore = create<IPcbVirtualDomStore>(
                     ruleSets.forEach((ruleSet) => {
                         state.pcbLayoutRuleSets[ruleSet.uid] = ruleSet;
                     });
+                    bakeChanges(state);
                 })
             ),
         removePcbLayoutRuleSets: (ruleSetUids: string[]) =>
@@ -95,6 +128,7 @@ export const usePcbVirtualDomStore = create<IPcbVirtualDomStore>(
                     ruleSetUids.forEach((ruleSetUid) => {
                         delete state.pcbLayoutRuleSets[ruleSetUid];
                     });
+                    bakeChanges(state);
                 })
             ),
         pcbLayoutNodes: {},
@@ -115,7 +149,8 @@ export const usePcbVirtualDomStore = create<IPcbVirtualDomStore>(
                     Object.values(nodes).forEach((node) => {
                         state.pcbLayoutNodes[node.uid] = { ...node };
                     });
-                    // state.activeLayoutNode = getDefaultLayoutOrFootprint(state); TODO @matt: re-implement this
+                    state.activeLayoutNode = getDefaultLayoutOrFootprint(state); // TODO @matt: re-implement this
+                    bakeChanges(state);
                 })
             ),
         setPcbLayoutNodes: (nodes: IPcbLayoutNode[]) =>
@@ -124,6 +159,7 @@ export const usePcbVirtualDomStore = create<IPcbVirtualDomStore>(
                     nodes.forEach((node) => {
                         state.pcbLayoutNodes[node.uid] = node;
                     });
+                    bakeChanges(state);
                 })
             ),
         removePcbLayoutNodes: (nodeUids: string[]) =>
@@ -132,6 +168,7 @@ export const usePcbVirtualDomStore = create<IPcbVirtualDomStore>(
                     nodeUids.forEach((nodeUid) => {
                         delete state.pcbLayoutNodes[nodeUid];
                     });
+                    bakeChanges(state);
                 })
             ),
         setPcbLayoutNodeLayoutRules: (
@@ -153,6 +190,7 @@ export const usePcbVirtualDomStore = create<IPcbVirtualDomStore>(
                                     pcbLayoutRule;
                             }
                         );
+                        bakeChanges(state);
                     }
                 })
             ),
@@ -169,6 +207,7 @@ export const usePcbVirtualDomStore = create<IPcbVirtualDomStore>(
                             delete node.pcbNodeRuleSet[ruleUid];
                         });
                     }
+                    bakeChanges(state);
                 })
             ),
         setTogglePcbRule: (
@@ -201,6 +240,7 @@ export const usePcbVirtualDomStore = create<IPcbVirtualDomStore>(
                             }
                         }
                     }
+                    bakeChanges(state);
                 })
             ),
         setToggleObjectSpecificPcbRule: (
@@ -219,6 +259,7 @@ export const usePcbVirtualDomStore = create<IPcbVirtualDomStore>(
                             rule.disabled = toggleState;
                         }
                     }
+                    bakeChanges(state);
                 })
             ),
     }))

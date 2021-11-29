@@ -4,7 +4,7 @@ import CameraControls from "./camera-controls";
 import { useCallback, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { Box3, Scene, Vector3 } from "three";
-import {useStore} from "./Scene";
+import {usePcbEditorUiStore} from "./Scene";
 import { useNavigationControls } from "./useNavigationControls";
 import {DOLLY_TO_CURSOR} from "./OrthographicNavigationControls";
 
@@ -85,7 +85,7 @@ export default function PerspectiveNavigationControls() {
     const { camera, scene } = useThree();
     const gl = useThree((state) => state.gl);
     const controlsRef = useRef<CameraControls>();
-    const flipped = useStore(state => state.flipped);
+    const flipped = usePcbEditorUiStore(state => state.flipped);
 
     const zoomToFit = useCallback(async () => {
         const controls = controlsRef.current;
@@ -167,10 +167,12 @@ export default function PerspectiveNavigationControls() {
 
             if (filtered.length !== 0) {
                 // sphere.position.copy( filtered[ 0 ].point );
+
+                console.log("orbit point", filtered[0].point);
                 controlsRef.current?.setOrbitPoint(
                     filtered[0].point.x,
                     filtered[0].point.y,
-                    filtered[0].point.z
+                    0
                 );
             }
         };

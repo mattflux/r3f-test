@@ -59,6 +59,20 @@ export interface IPcbLayoutBakedConnectedLayersNodeRules {
     connectedLayerUids: string[];
 }
 
+export interface IPcbLayoutBakedFootprintNodeRules
+    extends IPcbLayoutBakedBaseNodeRules,
+        IPcbLayoutBakedBasePositionNodeRules,
+        IPcbLayoutBakedBaseRotationNodeRules {
+    case?: IPcbLayoutBakedFootprintCaseRules;
+    silkColor: string;
+    stackup?: PcbBoardLayersMap;
+}
+
+export interface IPcbLayoutBakedFootprintCaseRules {
+    position?: IVector3;
+    size?: IVector3;
+}
+
 export interface IPcbLayoutBakedPadNodeRules
     extends IPcbLayoutBakedBaseNodeRules,
         IPcbLayoutBakedBasePositionNodeRules,
@@ -82,6 +96,12 @@ export interface IPcbLayoutBakedPadNodeRules
     };
     solderPasteMaskExpansion?: number;
 }
+
+export interface IPcbLayoutBakedElementNodeRules
+    extends IPcbLayoutBakedBaseNodeRules,
+        IPcbLayoutBakedBasePositionNodeRules,
+        IPcbLayoutBakedBaseRotationNodeRules,
+        IPcbLayoutBakedBaseLayerNodeRules {}
 
 export interface IPcbLayoutBakedViaNodeRules
     extends IPcbLayoutBakedBaseNodeRules,

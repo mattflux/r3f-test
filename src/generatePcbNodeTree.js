@@ -43,22 +43,24 @@ function makeRule(key, value) {
 var template = [
     {
         type: SharedDataModels_1.BasePcbLayoutNodeTypes.pad,
-        rules: { positionX: 0.5, positionY: 0.5 }
+        rules: { positionX: 10, positionY: -10 }
     },
     {
         type: SharedDataModels_1.BasePcbLayoutNodeTypes.pad,
+        rules: { positionX: -10, positionY: 10 },
         children: [
             { type: SharedDataModels_1.BasePcbLayoutNodeTypes.via },
             { type: SharedDataModels_1.BasePcbLayoutNodeTypes.via },
         ]
     },
-    { type: SharedDataModels_1.BasePcbLayoutNodeTypes.pad },
-    { type: SharedDataModels_1.BasePcbLayoutNodeTypes.via },
-    { type: SharedDataModels_1.BasePcbLayoutNodeTypes.via },
+    { type: SharedDataModels_1.BasePcbLayoutNodeTypes.pad, rules: { positionX: 20, positionY: 10 } },
+    { type: SharedDataModels_1.BasePcbLayoutNodeTypes.via, rules: { positionX: -30, positionY: 30 } },
+    { type: SharedDataModels_1.BasePcbLayoutNodeTypes.via, rules: { positionX: 30, positionY: -30 } },
 ];
 function makeTree(parent, children) {
+    var _a;
     // wanna append a bunch of pads/vias (and maybe later routes and routeSegments here)
-    var result = {};
+    var result = (_a = {}, _a[layoutNode.uid] = layoutNode, _a);
     children.forEach(function (child) {
         var node = makeNode(child.type + "_blah", parent.uid, child.type, child.rules);
         parent.childrenUids.push(node.uid);

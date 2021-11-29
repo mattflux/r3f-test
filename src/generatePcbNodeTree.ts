@@ -87,18 +87,19 @@ function makeRule(
 const template: Children[] = [
     {
         type: BasePcbLayoutNodeTypes.pad,
-        rules: { positionX: 0.5, positionY: 0.5 },
+        rules: { positionX: 10, positionY: -10 },
     },
     {
         type: BasePcbLayoutNodeTypes.pad,
+        rules: { positionX: -10, positionY: 10 },
         children: [
             { type: BasePcbLayoutNodeTypes.via },
             { type: BasePcbLayoutNodeTypes.via },
         ],
     },
-    { type: BasePcbLayoutNodeTypes.pad },
-    { type: BasePcbLayoutNodeTypes.via },
-    { type: BasePcbLayoutNodeTypes.via },
+    { type: BasePcbLayoutNodeTypes.pad, rules: { positionX: 20, positionY: 10 }, },
+    { type: BasePcbLayoutNodeTypes.via, rules: { positionX: -30, positionY: 30 } },
+    { type: BasePcbLayoutNodeTypes.via, rules: { positionX: 30, positionY: -30 } },
 ];
 
 type Children = {
@@ -109,7 +110,7 @@ type Children = {
 
 function makeTree(parent: Node, children: Children[]): IPcbLayoutNodesMap {
     // wanna append a bunch of pads/vias (and maybe later routes and routeSegments here)
-    const result: IPcbLayoutNodesMap = {};
+    const result: IPcbLayoutNodesMap = {[layoutNode.uid]: layoutNode};
     children.forEach((child) => {
         const node = makeNode(
             `${child.type}_blah`,

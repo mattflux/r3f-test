@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Box3, Mesh, MeshPhongMaterial, MeshPhysicalMaterial, Vector2, Vector3 } from "three";
-import { useStore } from "./Scene";
+import { usePcbEditorUiStore } from "./Scene";
 import { Text } from "@react-three/drei";
 
 import useAbstractLayoutMesh from "./useAbstractLayoutMesh";
@@ -8,7 +8,7 @@ import useLayoutShape from "./useLayoutShape";
 import usePhysicalLayoutMesh from "./usePhysicalLayoutMesh";
 import {useFrame, useThree} from "@react-three/fiber";
 
-const useMeshPhongMaterial = (parameters: any) => {
+export const useMeshPhongMaterial = (parameters: any) => {
     return new MeshPhongMaterial(parameters);
 };
 
@@ -22,7 +22,7 @@ function AbstractLayoutView(props: any) {
     // TODO pcbLayoutNodeHoles is dirty everytime...so had to put in isEqual for now until thats fixed
     const { nodeName } = { nodeName: "layout" };
     const {camera} = useThree();
-    const flipCameraState = useStore((state) => state.flipped);
+    const flipCameraState = usePcbEditorUiStore((state) => state.flipped);
     const contentContainerRef = useRef();
     const frameTextRef = useRef<any>(null!);
 
@@ -36,7 +36,7 @@ function AbstractLayoutView(props: any) {
         normalScale: new Vector2(1, 1),
         color: 0x000000,
     });
-    const sideMaterial = useMeshPhongMaterial({color: "darkgoldenrod"});
+    const sideMaterial = useMeshPhongMaterial({color: "white"});
 
     const materials = [surfaceMaterial, sideMaterial];
 
@@ -72,8 +72,6 @@ function AbstractLayoutView(props: any) {
     if (!mesh) {
         return null;
     }
-
-    console.log("text position", textPosition);
 
 
     return (

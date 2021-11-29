@@ -3,7 +3,7 @@ import CameraControls from "./camera-controls";
 import { useCallback, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { Box3, Scene } from "three";
-import {useStore} from "./Scene";
+import {usePcbEditorUiStore} from "./Scene";
 import { useNavigationControls } from "./useNavigationControls";
 
 CameraControls.install({ THREE: THREE });
@@ -52,8 +52,8 @@ export default function OrthographicNavigationControls() {
     const { camera, scene } = useThree();
     const gl = useThree((state) => state.gl);
     const controlsRef = useRef<CameraControls>();
-    const flipped = useStore(state => state.flipped);
-    const setFlipped = useStore(state => state.setFlipped);
+    const flipped = usePcbEditorUiStore(state => state.flipped);
+    const setFlipped = usePcbEditorUiStore(state => state.setFlipped);
 
     const flip = useCallback(() => {
         const controls = controlsRef.current;
