@@ -77,7 +77,9 @@ What do we need?
 - a generator to make an arbitrary Pcb node tree - DONE
 - replicate the "virtualDomStore" - DONE
 - add Zustand dev tools for debugging - DONE
-- replica layout engine to position nodes according to rules
+- replica layout engine to position nodes according to rules - DONE
+- replicate IDocumentData and make a routeGenerator
+- get the node generator to generate a whole IApplicationState (with most fields optional)
 
 */
 

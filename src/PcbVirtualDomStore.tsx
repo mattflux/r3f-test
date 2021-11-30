@@ -1,10 +1,11 @@
 import { produce } from "immer";
 import { useEffect, useMemo } from "react";
 import create from "zustand";
-import mockNodes from "./pcbNodes.json";
 import { devtools } from "zustand/middleware";
+import docState from "./mockDocument.json";
 
 import {
+    IApplicationState,
     IGlobalPcbLayoutRuleSetData,
     IPcbLayoutNode,
     IPcbLayoutNodesMap,
@@ -15,7 +16,8 @@ import {
 import {PcbLayoutEngine} from "./PcbLayoutingEngine";
 import {PcbLayoutNodeTreeTraveler} from "./PcbLayoutNodeTreeTraveler";
 
-const documentId = "my-document";
+const doc = (docState as IApplicationState).document.present;
+
 export interface IPcbVirtualDomStore {
     pcbLayoutRuleSets: IPcbLayoutRuleSetsMap;
     applyPcbLayoutRuleSetsFromMainStore: (
@@ -50,7 +52,7 @@ export interface IPcbVirtualDomStore {
 }
 
 export function getDefaultLayoutOrFootprint(state: IPcbVirtualDomStore) {
-    const documentUid = documentId;
+    const documentUid = doc.uid;
     if (documentUid) {
         const treeTraveler = new PcbLayoutNodeTreeTraveler(state.pcbLayoutNodes);
         let defaultLayoutOrFootprint: IPcbLayoutNode = treeTraveler.getDefaultLayout(documentUid);
@@ -66,12 +68,12 @@ export function getDefaultLayoutOrFootprint(state: IPcbVirtualDomStore) {
 // this will allow the rules to reside on the PCB nodes as we want
 function bakeChanges(state: IPcbVirtualDomStore) {
     const pcbLayoutEngine = new PcbLayoutEngine(
-        documentId,
-        {},
-        {},
+        doc.uid,
+        doc.elements,
+        doc.routes,
         {},
         state.pcbLayoutNodes,
-        {}, // no mocked rulesets yet
+        {}, // no mocked rulesets yet. but when we do it should reference 'state' (not doc)
     );
 
     pcbLayoutEngine.applyPcbLayoutRulesToPcbDOM();
@@ -85,7 +87,7 @@ export function usePcbVirtualDomStoreSync() {
         (state) => state.applyPcbLayoutRuleSetsFromMainStore
     );
 
-    const documentPcbLayoutNodes = mockNodes as IPcbLayoutNodesMap;
+    const documentPcbLayoutNodes = doc.pcbLayoutNodes;
     const documentPcbLayoutRuleSets = useMemo(() => ({}), []);
 
     useEffect(() => {

@@ -91,8 +91,6 @@ function AbstractCircularPad(props: IPcbLayoutBaseNodeProps) {
         props.uid
     );
 
-    console.log("abstract pad", circularPadMesh, bakedRules);
-
     if (!circularPadMesh) {
         return null;
     }

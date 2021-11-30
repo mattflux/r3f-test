@@ -26,7 +26,6 @@ export default function Box(props: any) {
         userData={{id: "yo"}}
         onPointerOver={(event) => {
             setHover(true);
-            console.log("box position", mesh.current?.position)
         }}
         onPointerOut={(event) => setHover(false)}>
         <boxBufferGeometry args={[0.05, 0.05, 0]} />

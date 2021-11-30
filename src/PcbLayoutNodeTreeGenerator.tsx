@@ -18,10 +18,13 @@ import Box from "./components/Box";
 
 import Layout from "./nodes/Layout";
 import Pad from "./nodes/Pad";
+import Route from "./nodes/Route";
+import RouteSegment from "./nodes/RouteSegment";
 import Via from "./nodes/Via";
 import selectors from "./pcbSelectors";
-import {usePcbVirtualDomStore} from "./PcbVirtualDomStore";
-import {BasePcbLayoutNodeTypes} from "./SharedDataModels";
+import Element from "./nodes/Element";
+import { usePcbVirtualDomStore } from "./PcbVirtualDomStore";
+import { BasePcbLayoutNodeTypes } from "./SharedDataModels";
 
 interface IPcbLayoutNodeProps {
     uid: string;
@@ -34,8 +37,8 @@ export interface IPcbLayoutBaseNodeProps {
 
 function PcbLayoutNodeTreeGenerator(props: IPcbLayoutNodeProps) {
     // Redux State
-    const {pcbLayoutNodeType, pcbLayoutNodeChildUids} = usePcbVirtualDomStore(
-        selectors.usePcbLayoutNodeSelector(props.uid),
+    const { pcbLayoutNodeType, pcbLayoutNodeChildUids } = usePcbVirtualDomStore(
+        selectors.usePcbLayoutNodeSelector(props.uid)
     );
 
     switch (pcbLayoutNodeType) {
@@ -43,16 +46,34 @@ function PcbLayoutNodeTreeGenerator(props: IPcbLayoutNodeProps) {
             return (
                 <Layout key={props.uid} uid={props.uid}>
                     {pcbLayoutNodeChildUids.map((childUid) => (
-                        <PcbLayoutNodeTreeGenerator uid={childUid} key={childUid} />
+                        <PcbLayoutNodeTreeGenerator
+                            uid={childUid}
+                            key={childUid}
+                        />
                     ))}
                 </Layout>
+            );
+        }
+        case BasePcbLayoutNodeTypes.element: {
+            return (
+                <Element key={props.uid} uid={props.uid}>
+                    {pcbLayoutNodeChildUids.map((childUid) => (
+                        <PcbLayoutNodeTreeGenerator
+                            uid={childUid}
+                            key={childUid}
+                        />
+                    ))}
+                </Element>
             );
         }
         case BasePcbLayoutNodeTypes.pad: {
             return (
                 <Pad key={props.uid} uid={props.uid}>
                     {pcbLayoutNodeChildUids.map((childUid) => (
-                        <PcbLayoutNodeTreeGenerator uid={childUid} key={childUid} />
+                        <PcbLayoutNodeTreeGenerator
+                            uid={childUid}
+                            key={childUid}
+                        />
                     ))}
                 </Pad>
             );
@@ -61,30 +82,38 @@ function PcbLayoutNodeTreeGenerator(props: IPcbLayoutNodeProps) {
             return (
                 <Via key={props.uid} uid={props.uid}>
                     {pcbLayoutNodeChildUids.map((childUid) => (
-                        <PcbLayoutNodeTreeGenerator uid={childUid} key={childUid} />
+                        <PcbLayoutNodeTreeGenerator
+                            uid={childUid}
+                            key={childUid}
+                        />
                     ))}
                 </Via>
             );
         }
-        // case BasePcbLayoutNodeTypes.route: {
-        //     return (
-        //         <Route key={props.uid} uid={props.uid}>
-        //             {pcbLayoutNodeChildUids.map((childUid) => (
-        //                 <PcbLayoutNodeTreeGenerator uid={childUid} key={childUid} />
-        //             ))}
-        //         </Route>
-        //     );
-        // }
-        // case BasePcbLayoutNodeTypes.routeSegment: {
-        //     return (
-        //         <RouteSegment key={props.uid} uid={props.uid}>
-        //             {pcbLayoutNodeChildUids.map((childUid) => (
-        //                 <PcbLayoutNodeTreeGenerator uid={childUid} key={childUid} />
-        //             ))}
-        //         </RouteSegment>
-        //     );
-        // }
-
+        case BasePcbLayoutNodeTypes.route: {
+            return (
+                <Route key={props.uid} uid={props.uid}>
+                    {pcbLayoutNodeChildUids.map((childUid) => (
+                        <PcbLayoutNodeTreeGenerator
+                            uid={childUid}
+                            key={childUid}
+                        />
+                    ))}
+                </Route>
+            );
+        }
+        case BasePcbLayoutNodeTypes.routeSegment: {
+            return (
+                <RouteSegment key={props.uid} uid={props.uid}>
+                    {pcbLayoutNodeChildUids.map((childUid) => (
+                        <PcbLayoutNodeTreeGenerator
+                            uid={childUid}
+                            key={childUid}
+                        />
+                    ))}
+                </RouteSegment>
+            );
+        }
 
         // case BasePcbLayoutNodeTypes.text: {
         //     return (
@@ -123,9 +152,7 @@ function PcbLayoutNodeTreeGenerator(props: IPcbLayoutNodeProps) {
         //     );
         // }
         default: {
-            return (
-                null
-            );
+            return null;
         }
     }
 }

@@ -1,9 +1,10 @@
-import {meshBounds, Text, useHelper} from "@react-three/drei";
-import {ThreeEvent, useFrame, useThree} from "@react-three/fiber";
-import produce from "immer";
+// import {meshBounds, Text, useHelper} from "@react-three/drei";
+// import {ThreeEvent, useFrame, useThree} from "@react-three/fiber";
+// import produce from "immer";
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {Mesh} from "three";
 import {IPcbLayoutBakedBasePositionNodeRules, IPcbLayoutBakedBaseScaleNodeRules} from "../bakedModels";
+import {usePcbNodeToObject3dMapStore} from "../PcbNodeToObject3dMapStore";
 import {IPcbVirtualDomStore, usePcbVirtualDomStore} from "../PcbVirtualDomStore";
 
 export interface IPcbLayoutBaseNodeProps {
@@ -59,8 +60,8 @@ function PcbLayoutBaseNode(props: IPcbLayoutBaseNodeProps) {
     // // States
     // const setContextMenu = useContextMenuStore((state) => state.setContextMenu);
 
-    // const setNodeUidToObject3dIdMap = usePcbNodeToObject3dMapStore((state) => state.setNodeUidToObject3dIdMap);
-    // const removeNodeUidToObject3dIdMap = usePcbNodeToObject3dMapStore((state) => state.removeNodeUidToObject3dIdMap);
+    const setNodeUidToObject3dIdMap = usePcbNodeToObject3dMapStore((state) => state.setNodeUidToObject3dIdMap);
+    const removeNodeUidToObject3dIdMap = usePcbNodeToObject3dMapStore((state) => state.removeNodeUidToObject3dIdMap);
     // const setPcbLayoutNodeLayoutRules = usePcbVirtualDomStore((state) => state.setPcbLayoutNodeLayoutRules);
 
     const pcbLayoutNodePosition = usePcbVirtualDomStore(
@@ -146,13 +147,13 @@ function PcbLayoutBaseNode(props: IPcbLayoutBaseNodeProps) {
 
     // const [isDragging, setIsDragging] = useState<boolean>(false);
 
-    // useEffect(() => {
-    //     setNodeUidToObject3dIdMap(props.uid, positionRef.current.uuid);
+    useEffect(() => {
+        setNodeUidToObject3dIdMap(props.uid, positionRef.current.uuid);
 
-    //     return () => {
-    //         removeNodeUidToObject3dIdMap(props.uid);
-    //     };
-    // }, [props.uid, removeNodeUidToObject3dIdMap, setNodeUidToObject3dIdMap]);
+        return () => {
+            removeNodeUidToObject3dIdMap(props.uid);
+        };
+    }, [props.uid, removeNodeUidToObject3dIdMap, setNodeUidToObject3dIdMap]);
 
     // const isDragable = useMemo(() => {
     //     return (

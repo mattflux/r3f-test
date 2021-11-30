@@ -57,7 +57,6 @@ export default function OrthographicNavigationControls() {
 
     const flip = useCallback(() => {
         const controls = controlsRef.current;
-        console.log(controls?.azimuthAngle, controls?.polarAngle);
         if (flipped) {
             // normal
             controls?.rotateTo(0, 0);

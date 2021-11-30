@@ -14,6 +14,7 @@ import {
     IPcbLayoutLayoutNodeData,
     IPcbLayoutNode,
     IPcbLayoutPadNodeData,
+    IPcbLayoutRouteSegmentNodeData,
     IPcbLayoutViaNodeData,
 } from "./SharedDataModels";
 
@@ -28,6 +29,36 @@ export const getRootLevelPcbLayoutNodeUids = (state: IPcbVirtualDomStore) => {
 
     return [];
 };
+
+const useRouteSegmentFields = (nodeUid: string) => {
+    return useMemo(
+        () =>
+            (state: IPcbVirtualDomStore) => {
+                const pcbLayoutNodes = state.pcbLayoutNodes;
+                const node = pcbLayoutNodes[nodeUid] as IPcbLayoutRouteSegmentNodeData;
+                const bakedRules = node?.bakedRules;
+
+                let layerColor;
+
+                if (bakedRules?.parentRootLayoutUid) {
+                    const layoutNode = pcbLayoutNodes[bakedRules.parentRootLayoutUid] as IPcbLayoutLayoutNodeData;
+                    const layoutBakedRules = layoutNode?.bakedRules as IPcbLayoutBakedLayoutNodeRules;
+                    const pcbLayoutNodeLayers = Object.values(layoutBakedRules?.stackup || {});
+
+                    layerColor = getLayerColor(pcbLayoutNodeLayers, bakedRules?.layer, "Copper", undefined);
+                } else {
+                    layerColor = getLayerColor([], bakedRules?.layer, "Copper", undefined);
+                }
+
+                return {
+                    bakedRules: bakedRules,
+                    layerColor: layerColor,
+                };
+            },
+        [nodeUid],
+    );
+};
+
 
 export const useRootLevelPcbLayoutNodeUids = () => {
     return useMemo(
@@ -145,9 +176,6 @@ const usePadFields = (nodeUid: string) => {
             const pcbLayoutNodes = state.pcbLayoutNodes;
             const node = pcbLayoutNodes[nodeUid] as IPcbLayoutPadNodeData;
             const bakedRules = node?.bakedRules;
-
-
-            console.log("pad fields???", node, node?.bakedRules);
 
             let copperLayerColor;
             let solderPasteLayerColor;
@@ -405,7 +433,8 @@ const selectors = {
     useActiveRootLayoutUid,
     useFocusedNodeByType,
     useNodeVisibilityByType,
-    useViaFields
+    useViaFields,
+    useRouteSegmentFields
 };
 
 export default selectors;

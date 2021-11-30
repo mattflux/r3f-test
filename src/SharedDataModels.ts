@@ -244,11 +244,11 @@ export interface IElementsMap {
 
 export interface IElementData {
     label?: string;
-    readonly part_uid: string;
-    part_version: string;
+    // readonly part_uid: string;
+    // part_version: string;
     diagram_position: IVector2;
-    properties: IPropertiesMap;
-    sortedPropertyKeys?: string[];
+    // properties: IPropertiesMap;
+    // sortedPropertyKeys?: string[];
     uid: string;
 }
 
@@ -333,4 +333,50 @@ export type AssetFileTypes =
     | "gltf";
 
 
-    
+export interface IApplicationState {
+    document: {
+        present: IDocumentData;
+    }
+}
+
+export interface IDocumentData {
+    uid: string;
+    name: string;
+    description: string;
+    slug: string;
+    owner_handle: string;
+    // updated_by?: string;
+    // contributor_uids?: string[];
+    elements: IElementsMap;
+    routes: IRoutesMap;
+    // routeVertices: IVertexMap;
+    // comment_threads: ICommentThreadsMap;
+    properties: IPropertiesMap;
+    pcbLayoutRuleSets: IPcbLayoutRuleSetsMap;
+    pcbLayoutNodes: IPcbLayoutNodesMap;
+    // controls?: IControlConfig[];
+    // configs: IDocumentConfigsMap;
+    // active_users: IUserPresencesMap;
+    // assets: IAssetsMap;
+    // roles: IRolesMap;
+    // user_access_list?: string[];
+    // readonly copy_of_document_uid: string;
+    // readonly copy_count?: number;
+    // readonly fork_of_document_uid: string;
+    // readonly fork_count?: number;
+    // readonly star_count?: number;
+    // readonly comment_count?: number;
+    // readonly comment_likes_count?: number;
+    // readonly usage_count?: number;
+    // readonly unique_count?: number;
+    // readonly user_starred_list?: string[];
+    // behaviour?: string;
+    // behaviour_has_errors?: boolean;
+    // archived: boolean;
+    // simulation: {
+        // time_step_size: number;
+        // time_step_size_unit: string;
+    // };
+    // selectedSubjects?: string[];
+    // selectedPcbLayoutRuleUid?: string;
+}

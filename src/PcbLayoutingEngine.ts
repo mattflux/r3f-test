@@ -1432,11 +1432,8 @@ export class PcbLayoutEngine {
 
     private computePadNodeRules(subjectLayoutRules: IPcbLayoutRulesMap, nodeUid: string) {
         const padNode = this.pcbLayoutNodes[nodeUid] as IPcbLayoutPadNodeData;
-        console.log("pad rules");
         if (padNode) {
             const {parentRootLayoutUid, parentRootFootprintUid} = this.getRootParentNodeUid(nodeUid);
-
-            console.log("founda  pad", padNode, parentRootLayoutUid, parentRootFootprintUid);
 
             const position = this.getNodePosition(subjectLayoutRules, nodeUid);
             const rotation = this.getNodeRotation(subjectLayoutRules, nodeUid);
@@ -1616,8 +1613,6 @@ export class PcbLayoutEngine {
                         conductorWidth,
                     };
                 }
-
-                console.log("yup", padNode.bakedRules);
             }
         }
     }

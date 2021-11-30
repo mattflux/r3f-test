@@ -168,7 +168,6 @@ export default function PerspectiveNavigationControls() {
             if (filtered.length !== 0) {
                 // sphere.position.copy( filtered[ 0 ].point );
 
-                console.log("orbit point", filtered[0].point);
                 controlsRef.current?.setOrbitPoint(
                     filtered[0].point.x,
                     filtered[0].point.y,

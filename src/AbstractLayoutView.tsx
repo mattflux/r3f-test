@@ -66,8 +66,6 @@ function AbstractLayoutView(props: any) {
         return null;
     }
 
-    console.log("text position", textPosition);
-
     const hp = Math.PI;
 
     return (

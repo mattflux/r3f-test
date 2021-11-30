@@ -66,8 +66,6 @@ function PhysicalCircularPad(props: IPcbLayoutBaseNodeProps) {
         return null;
     }
 
-    console.log("rendering physical circular pad");
-
     return (
         <>
             <primitive visible={visibility} key={circularPadMesh.uuid} object={circularPadMesh}></primitive>
